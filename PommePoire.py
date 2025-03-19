@@ -1,32 +1,35 @@
-import serial
-import time
-from PIL import Image
+#Import dataset
+import cv2
 import numpy as np
+import requests
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+import sys
+import datetime
+from tensorflow import keras
+from tensorflow.keras.models import Model
+import tensorflow as tf
+import pathlib
+import os
+import requests
+import zipfile
 
-def preprocess_image(image_path):
-    img = Image.open(image_path).convert('L').resize((32, 32))  # Adapter la taille selon le CNN
-    img_array = np.array(img) / 255.0  # Normalisation
-    return img_array.flatten().tolist()
+# Télécharger le fichier ZIP depuis GitHub
+data_dir = tf.keras.utils.get_file(
+    "Apple.zip",
+    "https://github.com/lucienrivat/PommePOire/raw/main/Apple.zip",
+    extract=False
+)
 
-def send_image_to_arduino(image_path, port="COM3", baudrate=115200):
-    ser = serial.Serial(port, baudrate, timeout=1)
-    time.sleep(2)  # Laisser le temps à l'Arduino de se réinitialiser
-    
-    img_data = preprocess_image(image_path)
-    img_str = ','.join(map(str, img_data))
-    
-    ser.write((img_str + "\n").encode())
-    
-    response = ser.readline().decode().strip()
-    ser.close()
-    
-    if response == "pomme":
-        print("Diode verte allumée (pomme reconnue)")
-    elif response == "poire":
-        print("Diode jaune allumée (poire reconnue)")
-    else:
-        print("Erreur de reconnaissance")
+# Extraire le fichier ZIP dans /content/datasets
+with zipfile.ZipFile(data_dir, 'r') as zip_ref:
+    zip_ref.extractall('/content/datasets')
 
-# Exemple d'utilisation
-if __name__ == "__main__":
-    send_image_to_arduino("chemin/vers/image.jpg")
+# Définir le chemin du dossier contenant les images
+data_dir = pathlib.Path('/content/datasets/Apple')
+print("Dossier des images :", data_dir)
+print("Chemin absolu :", os.path.abspath(data_dir))
+
+# Compter le nombre d'images dans le dataset
+image_count = len(list(data_dir.glob('*/*')))
+print("Nombre d'images trouvées :", image_count)
