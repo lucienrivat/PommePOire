@@ -91,19 +91,34 @@ while 1:
             bitmap.append((R,G,B))
             index += 1
 
-    img_col = Image.new('L', (width, height))  # 'L' pour niveaux de gris
-    img_col.putdata(frame_col)  # Ajouter les données de chromatique
-    img_col.save(f"image_chromatique_{num}.png")  # Enregistrer l'image
-    print(f"Image de chromatique enregistrée sous le nom 'image_chromatique_{num}.png'.")
+    # Sauvegarde de l'image
+    image_filename = f"image_{num}.png"
+    image_path = os.path.join(r"C:\Users\rivat\OneDrive\Documents\GitHub\PommePOire", image_filename)
 
-    os.chdir("C:/Users/ton_utilisateur/Documents/GitHub/PommePOire")  # 📌 Aller dans le dossier du repo Git
+    img = Image.new('L', (width, height))
+    img.putdata(frame_col)
+    img.save(image_path)
 
-    subprocess.run(["git", "add", "image.png"])  # Ajouter l'image
-    subprocess.run(["git", "commit", "-m", f"Ajout de l'image {num}"])  # Commit
-    subprocess.run(["git", "push", "origin", "main"])  # Push vers GitHub
+    # Vérification si l'image a bien été enregistrée
+    if os.path.exists(image_path):
+        print(f"✅ Image enregistrée : {image_path}")
+    else:
+        print("❌ Problème : L'image n'a pas été sauvegardée.")
+
+    # Envoi sur GitHub
+    os.chdir(r"C:\Users\rivat\OneDrive\Documents\GitHub\PommePOire")
+
+    # Vérifier si le dépôt Git est bien initialisé
+    subprocess.run(["git", "status"], shell=True)
+
+    subprocess.run(["git", "add", image_filename], shell=True)
+    subprocess.run(["git", "commit", "-m", f"Ajout de l'image {num}"], shell=True)
+    subprocess.run(["git", "push", "origin", "main"], shell=True)
+
     print(f"🚀 Image {num} envoyée sur GitHub !")
 
-    num += 1  # Incrémenter le numéro d'image
+    num += 1
+
 
 ser.close()
 

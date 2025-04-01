@@ -38,6 +38,9 @@ void captureImg(uint16_t width, uint16_t height, bool chroma);
 #define TFT_DC 8
 #define TFT_RST 9
 
+#define TFT_MOSI 75 // Data out
+#define TFT_SCLK 76 // Clock out
+
 Adafruit_ST7789 lcd = Adafruit_ST7789(TFT_CS, TFT_DC, TFT_RST);
 
 void writeReg(byte regID, byte regVal){
