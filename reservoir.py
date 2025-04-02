@@ -1,10 +1,9 @@
 import serial
-from PIL import Image  # Importer la bibliothèque Pillow
-import os
 from PIL import Image
+import os
 import subprocess
-# Configurez le port série et le débit en bauds
-ser = serial.Serial('COM3', 460800)  # Remplacez 'COM3' par le port série de votre Arduino
+
+ser = serial.Serial('COM3', 460800)  # Remplace 'COM3' par le port série de ton Arduino
 ser.flushInput()
 
 # Dimensions de l'image
@@ -12,8 +11,10 @@ width = 320
 height = 240
 
 num = 1
-while 1:
-    # Attendre le signal "debut"
+max_photos = 3  # Limite à 3 photos
+
+while num <= max_photos:
+    # Attendre le signal "READY"
     print("En attente du signal 'READY'...")
     while True:
         if ser.in_waiting > 0:
@@ -33,10 +34,10 @@ while 1:
             if ser.in_waiting > 0:
                 data = ser.read()  # Lire un octet
                 frame_lum.append(ord(data))  # Convertir en entier (0-255)
-
     except KeyboardInterrupt:
         print("Interruption par l'utilisateur.")
 
+    # Attendre le signal "COULEUR"
     print("En attente du signal 'COULEUR'...")
     while True:
         try:
@@ -52,11 +53,10 @@ while 1:
     # Lire les données de chromatique
     frame_col = []
     try:
-        while len(frame_col) < width * height:  # 1 octet par pixel pour chromatique (U et V combinés)
+        while len(frame_col) < width * height:
             if ser.in_waiting > 0:
                 data = ser.read()  # Lire un octet
                 frame_col.append(ord(data))  # Convertir en entier (0-255)
-
     except KeyboardInterrupt:
         print("Interruption par l'utilisateur.")
 
@@ -77,8 +77,6 @@ while 1:
             dataCb.extend([chroma,chroma])
             Alt = True
 
-
-
     for y in range(height):
         for x in range(width):
             Y = frame_lum[index]
@@ -95,9 +93,23 @@ while 1:
     image_filename = f"image_{num}.png"
     image_path = os.path.join(r"C:\Users\rivat\OneDrive\Documents\GitHub\PommePOire", image_filename)
 
-    img = Image.new('L', (width, height))
-    img.putdata(frame_col)
-    img.save(image_path)
+    # Créer l'image en couleur avec Pillow
+    img = Image.new('RGB', (width, height))
+    img.putdata(bitmap)
+    img.save(f"image_recue_couleur_{num}.png")
+    print(f"Image enregistrée sous le nom 'image_recue_couleur_{num}.png'.")
+
+    # Enregistrer l'image de chromatique
+    img_col = Image.new('L', (width, height))
+    img_col.putdata(frame_col)
+    img_col.save(f"image_chromatique_{num}.png")
+    print(f"Image de chromatique enregistrée sous le nom 'image_chromatique_{num}.png'.")
+
+    # Enregistrer l'image de luminance
+    img_lum = Image.new('L', (width, height))
+    img_lum.putdata(frame_lum)
+    img_lum.save(f"image_luminance_{num}.png")
+    print(f"Image de luminance enregistrée sous le nom 'image_luminance_{num}.png'.")
 
     # Vérification si l'image a bien été enregistrée
     if os.path.exists(image_path):
@@ -119,6 +131,4 @@ while 1:
 
     num += 1
 
-
 ser.close()
-
