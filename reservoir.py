@@ -90,20 +90,8 @@ while num <= max_photos:
             index += 1
 
     # Sauvegarde de l'image
-    image_filename = f"image_{num}.png"
+    image_filename = f"image_luminance_{num}.png"
     image_path = os.path.join(r"C:\Users\rivat\OneDrive\Documents\GitHub\PommePOire", image_filename)
-
-    # Créer l'image en couleur avec Pillow
-    img = Image.new('RGB', (width, height))
-    img.putdata(bitmap)
-    img.save(f"image_recue_couleur_{num}.png")
-    print(f"Image enregistrée sous le nom 'image_recue_couleur_{num}.png'.")
-
-    # Enregistrer l'image de chromatique
-    img_col = Image.new('L', (width, height))
-    img_col.putdata(frame_col)
-    img_col.save(f"image_chromatique_{num}.png")
-    print(f"Image de chromatique enregistrée sous le nom 'image_chromatique_{num}.png'.")
 
     # Enregistrer l'image de luminance
     img_lum = Image.new('L', (width, height))
